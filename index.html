@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday 🎉</title>
+  <meta name="description" content="A cute, animated birthday website with photo slideshows, confetti and music." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1226;
+      --card: #171a36;
+      --muted: #9aa0ff;
+      --accent: #ff92c2;
+      --accent-2: #86ffcf;
+      --text: #f6f7ff;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 22px;
+      
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body {
+      font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 80% -10%, #1b1f4a, var(--bg)) fixed;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* Floating blobs */
+    .blob { position: fixed; z-index: -1; filter: blur(60px); opacity: .35; animation: float 18s ease-in-out infinite; }
+    .blob.one { width: 480px; height: 480px; background: #6a5cff; top: -120px; left: -120px; border-radius: 50%; }
+    .blob.two { width: 380px; height: 380px; background: #ff5ca4; bottom: -120px; right: -60px; border-radius: 50%; animation-delay: -9s; }
+    .blob.three { width: 300px; height: 300px; background: #53ffc7; bottom: 20%; left: -120px; border-radius: 50%; animation-delay: -4s; }
+    @keyframes float { 0%,100%{transform:translateY(0)translateX(0)scale(1);}50%{transform:translateY(-20px)translateX(10px)scale(1.03);} }
+
+    header.hero { min-height: 100vh; display: grid; place-items: center; text-align: center; padding: 80px 20px 40px; position: relative; }
+    .hero-inner { max-width: 980px; width: 100%; }
+
+    .badge { display:inline-flex; gap:8px; align-items:center; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); padding:8px 14px; border-radius:999px; font-size:14px; box-shadow:var(--shadow); backdrop-filter:blur(8px);}
+    .title { font-family:"Pacifico",cursive; font-size:clamp(36px,7vw,72px); line-height:1.1; margin:18px 0 8px; text-shadow:0 8px 40px rgba(0,0,0,.45);}
+    .subtitle { color:#d8dafc; opacity:.9; font-size:clamp(14px,3vw,20px); }
+
+    .cta-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:26px 0 0;}
+    .btn { appearance:none; border:none; cursor:pointer; color:var(--text); padding:12px 18px; border-radius:16px; font-weight:600; font-size:15px; background:linear-gradient(135deg,var(--accent),#ffa6d0); box-shadow:var(--shadow); transition:transform .12s ease;}
+    .btn.secondary { background:linear-gradient(135deg,#7ea2ff,#8ee3ff);}
+    .btn:active { transform:translateY(1px)scale(.99); }
+
+    .card { background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04)); border:1px solid rgba(255,255,255,.14); box-shadow:var(--shadow); border-radius:var(--radius);}
+
+    #confetti { position:fixed; inset:0; pointer-events:none; z-index:20;}
+
+    section { padding:40px 16px; }
+    .section-title { text-align:center; font-size:clamp(22px,4vw,32px); margin:8px auto 20px; opacity:.95;}
+
+    /* Slider */
+    .slider { max-width:1024px; margin:0 auto; position:relative;}
+    .viewport { overflow:hidden; border-radius:var(--radius); position:relative; box-shadow:var(--shadow);}
+    .track { display:flex; transition:transform .6s cubic-bezier(.2,.7,.2,1);}
+
+    .slide {
+      position: relative; display: flex; justify-content: center; align-items: center;
+      min-width: 100%; aspect-ratio: 16/9; background: #0b0e22;
+    }
+    .slide img {
+      width: 100%; height: 100%; object-fit: contain;
+      border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.4);
+    }
+    .slide .caption {
+      position: absolute; left: 16px; right: 16px; bottom: 16px;
+      background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0, 0, 0, 0.509));
+      padding: 12px; border-radius: 14px; color: #fff; font-weight: 600;
+      text-shadow: 0 2px 20px rgba(0,0,0,.6); font-size: clamp(12px,2.5vw,16px);
+    }
+
+    .arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.3); color:#fff; width:42px; height:42px; border-radius:999px; cursor:pointer; display:grid; place-items:center; backdrop-filter:blur(4px); z-index:2;}
+    .arrow:hover { background:rgba(0,0,0,.55);}
+    .arrow.prev { left:12px;} .arrow.next { right:12px;}
+
+    .dots { display:flex; gap:8px; justify-content:center; padding:14px 0 0; flex-wrap:wrap;}
+    .dot { width:10px; height:10px; border-radius:999px; background:#8085ff; opacity:.4; cursor:pointer; border:1px solid rgba(255,255,255,.35);}
+    .dot.active { opacity:1; transform:scale(1.2); background:var(--accent);}
+
+    /* Notes carousel */
+    .notes { max-width:980px; margin:0 auto;}
+    .note-card { padding:22px; margin:10px; min-height:140px; }
+    .notes-track { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(260px,1fr); gap:12px; overflow-x:auto; scroll-snap-type:x mandatory;}
+    .notes-track .note-card { scroll-snap-align:start;}
+
+    footer { text-align:center; color:#cdd0ff; opacity:.8; padding:40px 16px 80px; font-size:14px;}
+
+    /* Music control (floating) */
+    .music {
+      position: fixed; bottom: 16px; right: 16px;
+      background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 12px; padding: 10px 14px; box-shadow: var(--shadow);
+      font-size: 14px; display: flex; gap: 8px; align-items: center; backdrop-filter: blur(6px);
+    }
+    .music button { border: none; background: var(--accent); color: #000; font-weight: 700; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+
+    /* Mobile tweaks */
+    @media(max-width:520px){
+      .arrow{width:34px;height:34px;}
+      .slide .caption{font-size:12px;padding:8px;}
+      .btn{font-size:14px;padding:10px 14px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="blob one"></div><div class="blob two"></div><div class="blob three"></div>
+  <canvas id="confetti"></canvas>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="badge">🎂 <span id="yearLabel"></span> • Birthday Special</span>
+      <h1 class="title" id="heroTitle">Happy Birthday, Anushka 💖</h1>
+      <p class="subtitle" id="typewriter"></p>
+      <div class="cta-row">
+        <a class="btn" href="#gallery">CLICK HERE..</a>
+        <button class="btn secondary" id="confettiBtn">Throw Confetti 🎉</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="gallery">
+      <h2 class="section-title">✨✨</h2>
+      <div class="slider">
+        <div class="viewport card" id="viewport">
+          <button class="arrow prev" id="prevBtn">&#10094;</button>
+          <button class="arrow next" id="nextBtn">&#10095;</button>
+          <div class="track" id="track"></div>
+        </div>
+        <div class="dots" id="dots"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Little Notes...</h2>
+      <div class="notes"><div class="notes-track" id="notesTrack"></div></div>
+    </section>
+  </main>
+
+  <footer>
+    Made by <span id="yourName">Your Name</span> • <span id="herName">Her Name</span>'s Birthday
+  </footer>
+
+  <script>
+    const SETTINGS = {
+      herName:"Anushka", yourName:"Adarsh",
+      heroTitle:"Happy Birthday, Anushka.. !",
+      typeLines:[
+        "You make every day brighter.",
+        "Today is all about celebrating YOU.",
+        "Wishing you endless smiles, blessings, and cake! 🎂"
+      ],
+      photos:[
+        {src:"pic.anu/pic.4.jpg",caption:"Be happy always ❤️"},
+        {src:"pic.anu/pic.1.jpg",caption:"Smile that steals the spotlight 😎✨"},
+        {src:"pic.anu/pic.3.jpg",caption:"Some smiles never fade ✨"},
+        {src:"pic.anu/pic.5.jpg",caption:"Happiness looks good on you 😍"},
+        {src:"pic.anu/pic.2.jpg",caption:"Sorry for this pic 😂 but may your day be filled with endless chocolates, smiles, and love 🎂✨"}
+      ],
+      notes:[
+        "Happy Birthday! 🎂 Wishing you lots of happiness and success ahead. Stay blessed always.",
+        "No matter where life takes us, I’ll always be grateful for you. You’re truly special, today and always.",
+        "Seeing you smile has always been my favorite thing — may life give you countless reasons to smile.",
+        "Life may change, but good wishes never fade. I hope this year brings you only joy and success.",
+        "On your special day, I also want to say something from my heart — I’m sorry. Sorry if I ever made you feel less valued, sorry if my words or actions ever hurt you. You’ve always been someone so precious to me, and I truly respect the bond we still share. Life moves forward, but the care and good wishes I have for you will always remain. I just hope you’ll always keep that beautiful smile and stay surrounded by happiness."
+      ]
+    };
+
+    // Setup names / labels
+    document.getElementById('herName').textContent = SETTINGS.herName;
+    document.getElementById('yourName').textContent = SETTINGS.yourName;
+    document.getElementById('heroTitle').textContent = SETTINGS.heroTitle;
+    document.getElementById('yearLabel').textContent = new Date().getFullYear();
+
+    // Typewriter
+    const typeEl = document.getElementById('typewriter'); let ti=0, ci=0, del=false;
+    function loop(){
+      const t = SETTINGS.typeLines[ti % SETTINGS.typeLines.length];
+      typeEl.textContent = t.slice(0,ci) + (ci%2===0 ? "|" : "");
+      if(!del){
+        if(ci < t.length) ci++;
+        else { del=true; setTimeout(loop,1200); return; }
+      } else {
+        if(ci > 0) ci--;
+        else { del=false; ti++; }
+      }
+      setTimeout(loop, del?30:55);
+    }
+    loop();
+
+    // Build slides
+    const track = document.getElementById('track');
+    const dots = document.getElementById('dots');
+
+    SETTINGS.photos.forEach((p,i)=>{
+      const s = document.createElement('div');
+      s.className='slide';
+      s.innerHTML = `<img loading="lazy" src="${p.src}" alt="photo ${i+1}"><div class="caption">${p.caption}</div>`;
+      track.appendChild(s);
+
+      const d = document.createElement('div');
+      d.className='dot';
+      d.addEventListener('click',()=>goTo(i));
+      dots.appendChild(d);
+    });
+
+    let idx=0, total=SETTINGS.photos.length;
+    const prevBtn=document.getElementById('prevBtn');
+    const nextBtn=document.getElementById('nextBtn');
+
+    function update(){
+      track.style.transform = `translateX(-${idx*100}%)`;
+      [...dots.children].forEach((d,i)=>d.classList.toggle('active', i===idx));
+    }
+    function next(){ idx=(idx+1)%total; update(); }
+    function prev(){ idx=(idx-1+total)%total; update(); }
+    function goTo(i){ idx=i%total; update(); }
+    prevBtn.onclick=prev; nextBtn.onclick=next; update();
+
+    let autoplay = setInterval(next, 3000);
+    document.getElementById('viewport').addEventListener('mouseenter',()=>clearInterval(autoplay));
+    document.getElementById('viewport').addEventListener('mouseleave',()=>autoplay=setInterval(next,3000));
+
+    // Notes
+    const notesTrack=document.getElementById('notesTrack');
+    SETTINGS.notes.forEach(t=>{
+      const c=document.createElement('div');
+      c.className='note-card card';
+      c.textContent=t;
+      notesTrack.appendChild(c);
+    });
+
+    // Confetti
+    const confetti = document.getElementById('confetti');
+    const ctx = confetti.getContext('2d');
+    let parts=[];
+
+    function spawn(n=100){
+      for(let i=0;i<n;i++){
+        parts.push({
+          x: Math.random()*innerWidth,
+          y: -20 - Math.random()*innerHeight/2,
+          r: 3 + Math.random()*5,
+          vx: -1 + Math.random()*2,
+          vy: 1 + Math.random()*2.5,
+          a: Math.random()*Math.PI,
+          color: `hsl(${Math.random()*360},90%,65%)`
+        });
+      }
+    }
+
+    function resize(){
+      confetti.width  = innerWidth  * devicePixelRatio;
+      confetti.height = innerHeight * devicePixelRatio;
+      // reset transform before scaling to avoid compounding scale on resize
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+    }
+    resize();
+    addEventListener('resize', resize);
+
+    function loopC(){
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+      parts.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy; p.vy+=0.015; p.a+=0.1;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a);
+        ctx.fillStyle=p.color; ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2);
+        ctx.restore();
+      });
+      parts = parts.filter(p=>p.y<innerHeight+40);
+      requestAnimationFrame(loopC);
+    }
+    loopC();
+
+    document.getElementById('confettiBtn').onclick = () => spawn(200);
+    setTimeout(()=>spawn(120),800);
+
+    // Music
+    const song = document.getElementById('song');
+    const musicBtn = document.getElementById('musicBtn');
+    const musicLabel = document.getElementById('musicLabel');
+    let playing=false;
+
+    musicBtn.onclick = async () => {
+      if(!playing){
+        try{
+          await song.play();
+          playing = true;
+          musicBtn.textContent = '⏸ Pause';
+          musicLabel.textContent = 'Music: On';
+        }catch(e){
+          alert('Could not play music. Make sure music.mp3 exists and try again.');
+        }
+      } else {
+        song.pause();
+        playing = false;
+        musicBtn.textContent = '▶ Play';
+        musicLabel.textContent = 'Music: Off';
+      }
+    };
+  </script>
+</body>
+</html>
